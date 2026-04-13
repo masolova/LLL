@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lena Learns Latvian</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%239B1B30'/%3E%3Crect y='12' width='32' height='8' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+:root {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --border: #e7e5e4;
+  --text: #1c1917;
+  --text-muted: #57534e;
+  --text-faint: #a8a29e;
+  --accent: #991b1b;
+  --accent-soft: rgba(153,27,27,.07);
+  --accent-hover: #7f1d1d;
+  --radius: 8px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  height: 52px;
+  flex-shrink: 0;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark {
+  width: 28px; height: 28px; background: var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { display: block; }
+.logo-name { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+.logo-name .red { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 6px; }
+
+.btn-icon {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  border: none; background: none; border-radius: var(--radius); cursor: pointer;
+  color: var(--text-muted); position: relative; font-family: var(--font);
+}
+.btn-icon:hover { background: var(--accent-soft); color: var(--text); }
+.vocab-badge {
+  position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px;
+  background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
+  border-radius: 99px; display: none; align-items: center; justify-content: center; padding: 0 4px;
+}
+.vocab-badge.show { display: flex; }
+
+/* ── STREAK BUTTON ── */
+.streak-btn {
+  display: flex; align-items: center; gap: 4px;
+  border: none; background: none; cursor: pointer;
+  font-family: var(--font); font-size: 14px; font-weight: 700;
+  color: var(--text-muted); padding: 4px 8px; border-radius: var(--radius);
+}
+.streak-btn:hover { background: var(--accent-soft); color: var(--accent); }
+.streak-btn svg { color: var(--accent); }
+.streak-btn.active { color: var(--accent); }
+
+/* ── STREAK OVERLAY ── */
+.streak-body { padding: 24px; overflow-y: auto; flex: 1; }
+.streak-big {
+  font-size: 48px; font-weight: 700; color: var(--text); text-align: center;
+  margin-bottom: 4px; line-height: 1.2;
+}
+.streak-big small { font-size: 16px; font-weight: 400; color: var(--text-muted); }
+.streak-today {
+  text-align: center; font-size: 13px; color: var(--text-faint); margin-bottom: 24px;
+}
+.heatmap-months {
+  display: flex; justify-content: space-between; font-size: 10px;
+  color: var(--text-faint); margin-bottom: 4px; padding: 0 2px;
+}
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(53, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 2px; margin-bottom: 12px;
+}
+.hm-cell {
+  width: 12px; height: 12px; border-radius: 2px; cursor: default;
+}
+.hm-empty { background: #eee; }
+.hm-done { background: var(--accent); }
+.hm-future { background: transparent; }
+.hm-recover { cursor: pointer; }
+.hm-recover:hover { background: #ddd; outline: 2px solid var(--accent); }
+.heatmap-legend {
+  display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+  font-size: 11px; color: var(--text-faint); margin-bottom: 8px;
+}
+.heatmap-legend .hm-cell { width: 10px; height: 10px; }
+.streak-hint { text-align: center; font-size: 12px; color: var(--text-faint); }
+
+/* ── RECOVER BANNER ── */
+.recover-banner {
+  background: var(--accent-soft); border-bottom: 1px solid var(--border);
+  padding: 6px 24px; font-size: 13px; color: var(--accent);
+  text-align: center; font-weight: 500;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: calc(100dvh - 52px);
+  padding: 24px 32px 64px; position: relative;
+}
+.recover-active .main {
+  height: calc(100dvh - 52px - 34px);
+}
+
+/* Category row */
+.cat-row { display: flex; gap: 0; width: 100%; max-width: 900px; margin-bottom: 12px; }
+.cat-lv, .cat-ru {
+  flex: 1; font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--accent); padding: 0 16px;
+}
+.cat-ru { color: var(--accent); opacity: .7; }
+
+/* Sentence table */
+.sentence-table { width: 100%; max-width: 900px; }
+.sentence-row {
+  display: flex; border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.sentence-row:last-child { border-bottom: none; }
+.sent-lv, .sent-ru {
+  flex: 1; padding: 2px 16px; line-height: 1.4;
+}
+.sent-lv { font-size: 22px; font-weight: 400; color: var(--text); }
+.sent-ru { font-size: 22px; color: var(--text-muted); border-left: 1px solid var(--border); }
+
+/* Hidden translation */
+.ru-hidden .sent-ru { visibility: hidden; }
+.ru-hidden .cat-ru { visibility: hidden; }
+.reveal-prompt {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 50%;
+  display: none; flex-direction: column; align-items: flex-start;
+  justify-content: center; gap: 16px; text-align: center;
+  padding-left: 48px;
+  background: var(--surface); z-index: 2;
+}
+.ru-hidden .reveal-prompt { display: flex; }
+.btn-reveal {
+  padding: 10px 24px; border: 1px solid var(--border); background: var(--surface);
+  border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 600;
+  color: var(--text); cursor: pointer; transition: all .15s;
+}
+.btn-reveal:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.reveal-hint { font-size: 13px; color: var(--text-faint); }
+
+/* ── NAV ── */
+.nav-arrows {
+  position: absolute; bottom: 16px; left: 25%; transform: translateX(-50%);
+  display: flex; gap: 8px; align-items: center; z-index: 5;
+}
+.btn-more {
+  padding: 6px 16px; border: 1px solid var(--border); background: var(--surface);
+  border-radius: var(--radius); font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; transition: all .15s; margin-left: 12px;
+}
+.btn-more:hover { border-color: var(--accent); color: var(--accent); }
+.btn-more:disabled { opacity: .4; cursor: default; }
+.nav-arrows .counter { font-size: 12px; color: var(--text-faint); min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
+.btn-nav {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius);
+  cursor: pointer; color: var(--text-muted); transition: all .15s; font-family: var(--font);
+}
+.btn-nav:hover { border-color: var(--text-muted); color: var(--text); }
+.btn-nav:disabled { opacity: .3; cursor: default; }
+.btn-nav:disabled:hover { border-color: var(--border); color: var(--text-muted); }
+
+.sentence-table { transition: opacity .2s ease; }
+.sentence-table.fade-out { opacity: 0; }
+
+/* ── SELECTION POPUP ── */
+.selection-popup {
+  position: fixed; display: none; padding: 4px 12px; background: var(--text); color: #fff;
+  font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; z-index: 100;
+  white-space: nowrap; font-family: var(--font); box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.selection-popup.show { display: flex; align-items: center; gap: 6px; }
+
+/* ══════════════════════════════════════
+   VOCABULARY — FULL-PAGE OVERLAY
+   ══════════════════════════════════════ */
+.vocab-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 50;
+  display: none; flex-direction: column;
+}
+.vocab-overlay.open { display: flex; }
+
+.vocab-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; border-bottom: 1px solid var(--border);
+  background: var(--surface); height: 52px; flex-shrink: 0;
+}
+.vocab-header-left { display: flex; align-items: center; gap: 12px; }
+.vocab-title { font-size: 16px; font-weight: 700; }
+.vocab-count-label { font-size: 13px; color: var(--text-faint); }
+.vocab-header-right { display: flex; align-items: center; gap: 8px; }
+
+.btn-sort {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+  border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius);
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--text-muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.btn-sort:hover { border-color: var(--text-muted); color: var(--text); }
+.btn-sort.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.vocab-search-wrap { position: relative; width: 240px; }
+.vocab-search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none; }
+.vocab-search {
+  width: 100%; padding: 8px 12px 8px 34px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-family: var(--font); font-size: 13px;
+  background: var(--bg); color: var(--text); outline: none;
+}
+.vocab-search:focus { border-color: var(--accent); }
+.vocab-search::placeholder { color: var(--text-faint); }
+
+.vocab-filters {
+  display: flex; gap: 4px; padding: 8px 24px; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.vocab-filter-btn {
+  padding: 6px 14px; border: 1px solid var(--border); background: var(--surface);
+  border-radius: 99px; font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; transition: all .15s;
+}
+.vocab-filter-btn:hover { border-color: var(--text-muted); color: var(--text); }
+.vocab-filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-count { font-weight: 500; font-size: 11px; opacity: .65; margin-left: 2px; }
+.vocab-filter-btn.active .filter-count { opacity: .8; }
+
+/* Vocab list — compact card-style */
+.vocab-list-wrap { flex: 1; overflow-y: auto; padding: 12px 24px; }
+
+.vocab-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.vocab-item:last-child { border-bottom: none; }
+.vocab-fav-btn {
+  width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer; color: var(--text-faint); flex-shrink: 0;
+  border-radius: 4px;
+}
+.vocab-fav-btn:hover { color: var(--accent); }
+.vocab-fav-btn.active { color: var(--accent); }
+.vocab-words { min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.vocab-lv { font-size: 15px; font-weight: 600; color: var(--text); }
+.vocab-sep { color: var(--text-faint); font-size: 13px; }
+.vocab-ru { font-size: 14px; color: var(--text-muted); }
+.vocab-action-btn {
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer; color: var(--text-faint); flex-shrink: 0;
+  border-radius: 4px; opacity: 0; transition: opacity .15s;
+}
+.vocab-item:hover .vocab-action-btn { opacity: .6; }
+.vocab-action-btn:hover { opacity: 1 !important; }
+.vocab-action-btn.learned { color: var(--text-faint); }
+.vocab-action-btn.learned:hover { color: #16a34a; }
+.vocab-action-btn.learned.active { opacity: 1; color: #16a34a; }
+.vocab-action-btn.del:hover { color: var(--accent); }
+
+.vocab-empty-state {
+  padding: 80px 24px; text-align: center; color: var(--text-faint);
+  font-size: 14px; line-height: 1.7;
+}
+
+.vocab-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 24px; border-top: 1px solid var(--border);
+  background: var(--surface); font-size: 12px; color: var(--text-faint); flex-shrink: 0;
+}
+.btn-export { width: 32px; height: 32px; color: var(--text-faint); }
+.btn-export:hover { color: var(--accent); background: var(--accent-soft); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: #fff; padding: 10px 20px; border-radius: 99px;
+  font-size: 13px; font-weight: 600; z-index: 200; transition: transform .25s ease;
+  white-space: nowrap; font-family: var(--font);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2" y="3" width="12" height="2" rx="1" fill="white"/>
+        <rect x="2" y="7" width="9" height="2" rx="1" fill="white"/>
+        <rect x="2" y="11" width="11" height="2" rx="1" fill="white"/>
+      </svg>
+    </div>
+    <div class="logo-name"><span class="red">L</span>ena <span class="red">L</span>earns <span class="red">L</span>atvian</div>
+  </div>
+  <div class="header-right">
+    <button class="streak-btn" id="streakBtn" title="Стрик">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span id="streakNum">0</span>
+    </button>
+    <button class="btn-icon" id="vocabToggle" title="Словарик">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="vocab-badge" id="vocabBadge">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="recover-banner" id="recoverBanner" style="display:none"></div>
+<div class="main ru-hidden" id="mainArea">
+  <div class="cat-row">
+    <div class="cat-lv" id="lvCategory"></div>
+    <div class="cat-ru" id="ruCategory"></div>
+  </div>
+  <div class="sentence-table" id="sentenceTable"></div>
+  <div class="reveal-prompt">
+    <div class="reveal-hint">Прочитали текст на латышском?</div>
+    <button class="btn-reveal" id="btnReveal">Показать перевод</button>
+  </div>
+  <div class="nav-arrows">
+    <button class="btn-nav" id="btnPrev" aria-label="Предыдущая">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="counter" id="counter">1 / 5</span>
+    <button class="btn-nav" id="btnNext" aria-label="Следующая">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button class="btn-more" id="btnMore">Ещё новости</button>
+  </div>
+</div>
+
+<div class="selection-popup" id="selPopup">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+  В словарик
+</div>
+
+<!-- VOCABULARY OVERLAY -->
+<div class="vocab-overlay" id="vocabOverlay">
+  <div class="vocab-header">
+    <div class="vocab-header-left">
+      <button class="btn-icon" id="vocabClose" title="Закрыть">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <span class="vocab-title">Мой словарик</span>
+      <span class="vocab-count-label" id="vocabCountLabel">0 слов</span>
+    </div>
+    <div class="vocab-header-right">
+      <button class="btn-sort" id="vocabSortToggle" title="Сортировка">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h12"/><path d="M3 18h6"/></svg>
+        <span id="sortLabel">Новые</span>
+      </button>
+      <div class="vocab-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="vocab-search" id="vocabSearch" type="text" placeholder="Поиск...">
+      </div>
+    </div>
+  </div>
+  <div class="vocab-filters">
+    <button class="vocab-filter-btn active" data-filter="all">Новое <span class="filter-count" id="countAll"></span></button>
+    <button class="vocab-filter-btn" data-filter="fav">Избранное <span class="filter-count" id="countFav"></span></button>
+    <button class="vocab-filter-btn" data-filter="learned">Выученное <span class="filter-count" id="countLearned"></span></button>
+  </div>
+  <div class="vocab-list-wrap" id="vocabListWrap">
+    <div class="vocab-empty-state" id="vocabEmpty">
+      Выделите слово или фразу в тексте, чтобы сохранить в словарик.
+    </div>
+  </div>
+  <div class="vocab-footer">
+    <span id="vocabFooterStats">Всего: 0</span>
+    <span id="vocabFooterShowing"></span>
+    <button class="btn-icon btn-export" id="vocabExport" title="Скачать словарь">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Streak overlay -->
+<div class="vocab-overlay" id="streakOverlay" style="display:none">
+  <div class="vocab-header">
+    <span class="vocab-title">Стрик</span>
+    <button class="btn-icon" id="streakClose">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="streak-body" id="streakBody">
+    <div class="streak-big" id="streakBig">0 <small>дней подряд</small></div>
+    <div class="streak-today" id="streakToday"></div>
+    <div class="heatmap-months" id="heatmapMonths"></div>
+    <div class="heatmap" id="heatmap"></div>
+    <div class="heatmap-legend">
+      <span>Пусто</span>
+      <span class="hm-cell hm-empty" style="display:inline-block"></span>
+      <span class="hm-cell hm-done" style="display:inline-block"></span>
+      <span>Выполнено</span>
+    </div>
+    <div class="streak-hint">Клик на пустой день = восстановить</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// BUILT-IN WORD DICTIONARY (LV↔RU)
+// ═══════════════════════════════════
+// Covers all words from the news texts for accurate word-level translation
+const DICT_LV_RU = {
+  // Common
+  "un":"и","vai":"или","bet":"но, зато","ka":"что, как","par":"о, за","no":"от, из","ar":"с","uz":"на","ir":"есть, является",
+  "nav":"нет","bija":"был/была","būs":"будет","ja":"если","jo":"потому что","arī":"тоже, также",
+  "tas":"это, тот","šie":"эти","viņi":"они","viņš":"он","viņa":"она","mēs":"мы","kā":"как",
+  "vēl":"ещё","jau":"уже","tikai":"только","ļoti":"очень","viens":"один","viena":"одна",
+  "pirmajā":"в первом","pirmo":"первый, впервые","reizi":"раз","kopš":"с, с тех пор как",
+  
+  // News vocabulary
+  "bijušais":"бывший","kremļa":"Кремля","padomnieks":"советник",
+  "putins":"Путин","pārtrauktu":"прекратил бы, прекратит","karot":"воевать",
+  "būtu":"было бы, наступит","miers":"мир","ukraiņi":"украинцы",
+  "pārtrauks":"перестанут","cīnīties":"сражаться, бороться","mirs":"умрут, погибнут",
+  "vārdi":"слова","kļuvuši":"стали","spēcīgākajiem":"самых сильных",
+  "citātiem":"цитат","karu":"войну",
+  
+  "drīzāk":"скорее","nekā":"чем","pētnieks":"исследователь",
+  "jaunā":"новый/новая","grāmatā":"в книге","stāsta":"рассказывает",
+  "dzīvību":"жизнь","marsa":"Марса","uzskata":"считает",
+  "mikrobiālā":"микробная","dzīvība":"жизнь","iespējama":"возможная, вероятная",
+  
+  "gads":"год","austrālijā":"в Австралии","nakšņošana":"ночёвка",
+  "automašīnā":"в машине","ēdiens":"еда","kebabnīcām":"из кебабных",
+  "atgriešanās":"возвращение","mājās":"домой","pilnām":"полными",
+  "kabatām":"карманами","naudas":"денег","latvietis":"латвиец",
+  "dalās":"делится","pieredzē":"опытом","darbu":"работу","ārzemēs":"за рубежом",
+  
+  "tagad":"сейчас, теперь","sākam":"начинаем","šauruma":"пролива",
+  "attīrīšanas":"зачистки","procesu":"процесс","paziņo":"заявляет",
+  "tramps":"Трамп","flote":"флот","palielinās":"наращивает",
+  "klātbūtni":"присутствие","persijas":"Персидского","līcī":"в заливе",
+  "irāna":"Иран","pagaidām":"пока","nekomenē":"не комментирует",
+  
+  "pļaviņš":"Плявиньш","fokerots":"Фокеротс","brazīlijā":"в Бразилии",
+  "iekļūst":"выходит, попадает","turnīra":"турнира","pusfinālā":"в полуфинал",
+  "latvijas":"Латвии","pludmales":"пляжный","volejbolisti":"волейболисты",
+  "turpina":"продолжают","izcilu":"выдающийся","sezonu":"сезон",
+  "cīnīsies":"будут бороться","medaļām":"за медали",
+  
+  "jaunas":"новые","vēsmas":"веяния","rīgas":"Риги","centrā":"в центре",
+  "hanzas":"Ганзас","peronu":"перрона","ieskauj":"окружают",
+  "biroju":"офисные","ēkas":"здания","teritorija":"территория",
+  "bijušo":"бывшей","dzelzceļa":"железнодорожной","staciju":"станции",
+  "kļūst":"становится","modernu":"современный","biznesa":"бизнес","kvartālu":"квартал",
+  
+  "gadu":"лет","vecumā":"в возрасте, возрасте","mūžībā":"в вечность","devusies":"ушла",
+  "dejotāja":"танцовщица","horeogrāfe":"хореограф","viņa":"она",
+  "izcilākajām":"выдающихся","latviešu":"латвийских","dejas":"танца",
+  "māksliniecēm":"деятелей искусства","dzīvoja":"жила","trimdā":"в эмиграции",
+  
+  "garas":"длинные","rindas":"очереди","pie":"у, возле","bērnu":"детский",
+  "acu":"глазной","ārsta":"врач","pieraksta":"записывают",
+  "nedzimušu":"нерождённых","zīdaini":"младенцев","vecāki":"родители",
+  "spiesti":"вынуждены","meklēt":"искать","speciālistus":"специалистов",
+  "privātajā":"в частном","sektorā":"секторе","valsts":"государственных",
+  "klīnikās":"в клиниках","vietu":"мест",
+  
+  "sākas":"начались, начинаются","miera":"мирные","sarunas":"переговоры",
+  "tomēr":"однако","neatbloķēs":"не разблокируют","irānas":"иранские",
+  "aktīvus":"активы","diplomāti":"дипломаты","tiekas":"встречаются",
+  "omānā":"в Омане","lai":"чтобы","apspriestu":"обсудить",
+  "kodolprogrammu":"ядерную программу","sankcijas":"санкции",
+  
+  "atpakaļ":"обратно, назад","zemes":"Земли","sagaidīja":"встречали",
+  "mēness":"Лунная","misijas":"миссии","astronautus":"астронавтов",
+  "četri":"четыре","cilvēki":"человека","laikmeta":"эпохи",
+  "atgriezās":"вернулись","orbītas":"орбиты",
+  
+  "pļavniekos":"в Плявниеки","top":"строится","jauns":"новый",
+  "dzīvojamais":"жилой","dzīvokļu":"квартир","cenas":"цены",
+  "eiro":"евро","kvadrātmetru":"квадратный метр","projekts":"проект",
+  "paredz":"предусматривает","zaļās":"зелёные","zonas":"зоны","bērnudārzu":"детский сад",
+
+  "jaunā":"новой","grāmatā":"книге","dzīvību":"жизни",
+  "ļoti":"очень, весьма","jānis":"Янис","kauliņš":"Каулиньш",
+
+  // Additional coverage for word-by-word translation
+  "vienu":"одной",
+  "pirmoreiz":"впервые","apollo":"Аполлона",
+  "vija":"Вия","vētra":"Ветра",
+  "asv":"США","starp":"между",
+  "ap":"вокруг","hormuza":"Ормузского"
+};
+
+// Build reverse dictionary RU→LV (all variants, not just first)
+const DICT_RU_LV = {};
+for (const [lv, ru] of Object.entries(DICT_LV_RU)) {
+  // Split on comma and slash to register every variant
+  const variants = ru.split(/[,\/]/).map(v => v.trim().toLowerCase()).filter(Boolean);
+  for (const v of variants) {
+    if (!DICT_RU_LV[v]) DICT_RU_LV[v] = lv;
+  }
+  // Also register the whole string as-is
+  const full = ru.toLowerCase().trim();
+  if (!DICT_RU_LV[full]) DICT_RU_LV[full] = lv;
+}
+
+// Sentence-level alignment for fallback
+function findSentenceTranslation(text, lvFull, ruFull, sourceLang) {
+  const lvS = splitSentences(lvFull);
+  const ruS = splitSentences(ruFull);
+  const src = sourceLang === 'lv' ? lvS : ruS;
+  const tgt = sourceLang === 'lv' ? ruS : lvS;
+  const lower = text.toLowerCase().trim();
+  for (let i = 0; i < src.length; i++) {
+    if (src[i].toLowerCase().includes(lower) && i < tgt.length) {
+      return tgt[i].trim();
+    }
+  }
+  return '';
+}
+
+function translateWord(word, sourceLang) {
+  const w = word.toLowerCase().replace(/[.,!?;:«»""()—–]/g, '').trim();
+  if (!w) return '';
+  if (sourceLang === 'lv') {
+    return DICT_LV_RU[w] || '';
+  } else {
+    return DICT_RU_LV[w] || '';
+  }
+}
+
+function translatePhrase(phrase, sourceLang, lvFull, ruFull) {
+  const words = phrase.split(/\s+/);
+  
+  // 1. Single word → dict lookup only
+  if (words.length === 1) {
+    return translateWord(phrase, sourceLang);
+  }
+  
+  // 2. Multi-word: only return if ALL words found in dict (no partial guesses)
+  const translated = words.map(w => {
+    const t = translateWord(w, sourceLang);
+    return t ? t.split(',')[0].trim() : '';
+  });
+  if (translated.every(Boolean)) return translated.join(' ');
+  
+  // 3. If any word missing — return empty, let online API handle the whole phrase
+  return '';
+}
+
+// ═══════════════════════════════════
+// LIVE NEWS — Delfi.lv RSS + MyMemory
+// ═══════════════════════════════════
+const NEWS_COUNT = 10;
+const MORE_COUNT = 5;
+const DELFI_RSS = 'https://www.delfi.lv/rss/index.xml';
+const DELFI_RSS_FALLBACK = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.delfi.lv%2Frss%2Findex.xml';
+const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
+const GOOGLE_TRANSLATE_KEY = 'AIzaSyBgwM0gqpszGcvT3CgVK9VFp1ojAMO6pzg';
+const GOOGLE_TRANSLATE = 'https://translation.googleapis.com/language/translate/v2';
+
+// Category mapping from Delfi RSS <category> tags
+const CAT_MAP = {
+  'ārzemēs':     ['Ārzemēs', 'В мире'],
+  'ārzemes':     ['Ārzemēs', 'В мире'],
+  'sabiedrība':  ['Latvija', 'Латвия'],
+  'latvija':     ['Latvija', 'Латвия'],
+  'ekonomika':   ['Ekonomika', 'Экономика'],
+  'nekustamais īpašums': ['Ekonomika', 'Экономика'],
+  'biznesa vide':['Ekonomika', 'Экономика'],
+  'sports':      ['Sports', 'Спорт'],
+  'tehnoloģijas':['Tehnoloģijas', 'Технологии'],
+  'kosmoss':     ['Tehnoloģijas', 'Технологии'],
+  'kriminālziņas':['Kriminālziņas', 'Криминал'],
+  'kultūra':     ['Kultūra', 'Культура'],
+  'spried ar delfi':['Viedokļi', 'Мнения'],
+};
+
+function detectCategory(link, categories) {
+  // Use Delfi <category> tags
+  if (categories && categories.length) {
+    for (const c of categories) {
+      const key = c.toLowerCase().trim();
+      if (CAT_MAP[key]) return { cat: CAT_MAP[key][0], catRu: CAT_MAP[key][1] };
+    }
+  }
+  return { cat: 'Ziņas', catRu: 'Новости' };
+}
+
+// Skip only weather
+const SKIP_RE = /laika ziņ|laikapstākļ|temperatūr.*grād|nokrišņ|meteorolog|laika prognoz|vietām līs|vietām snigs/i;
+const SKIP_CAT = /laika-zinas|weather/i;
+
+let NEWS = [];
+let newsHistory = []; // all previously loaded news
+let newsLoaded = false;
+let newsError = false;
+
+// Verify translation language: lv→ru must contain Cyrillic, ru→lv must contain Latin
+function validTranslationLang(text, targetLang) {
+  if (!text) return false;
+  if (targetLang === 'ru') return /[а-яА-ЯёЁ]/.test(text);
+  if (targetLang === 'lv') return /[a-zA-ZāčēģīķļņšūžĀČĒĢĪĶĻŅŠŪŽ]/.test(text);
+  return true;
+}
+
+async function translateText(text, from, to) {
+  try {
+    const url = `${GOOGLE_TRANSLATE}?key=${GOOGLE_TRANSLATE_KEY}`;
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: text, source: from, target: to, format: 'text' })
+    });
+    const j = await r.json();
+    if (j.data && j.data.translations && j.data.translations[0]) {
+      const t = j.data.translations[0].translatedText;
+      if (!validTranslationLang(t, to)) return '';
+      return decodeHtml(t); // Google may return HTML entities
+    }
+  } catch(e) { console.warn('Translation error:', e); }
+  return '';
+}
+
+// All RSS items cache (for "load more")
+let rssItemsCache = [];
+let rssOffset = 0;
+
+function buildTweetText(title, descRaw) {
+  const TWEET_MAX = 280;
+  let text = title;
+  if (!text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?')) text += '.';
+  if (descRaw && descRaw !== title && descRaw !== title + '.') {
+    const sentences = splitSentences(descRaw);
+    for (const sent of sentences) {
+      const s = sent.trim();
+      if (!s) continue;
+      if (text.length + 1 + s.length <= TWEET_MAX) {
+        text += ' ' + s;
+      } else break;
+    }
+  }
+  if (!text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?')) text += '.';
+  return text;
+}
+
+function filterRssItems(items, count) {
+  const candidates = [];
+  for (const item of items) {
+    const title = (item.title || '').trim();
+    const link = (item.link || '').trim();
+    const descRaw = (item.desc || '').trim();
+    const cats = item.categories || [];
+    // Skip weather by category or content
+    if (cats.some(c => SKIP_CAT.test(c))) continue;
+    if (SKIP_RE.test(title) || SKIP_RE.test(descRaw)) continue;
+    if (title.length < 15) continue;
+    if (newsHistory.some(n => n.lv.startsWith(title))) continue;
+    const { cat, catRu } = detectCategory(link, cats);
+    candidates.push({ cat, catRu, lv: buildTweetText(title, descRaw) });
+    if (candidates.length >= count) break;
+  }
+  return candidates;
+}
+
+async function translateAndAddNews(candidates, prepend) {
+  const freshNews = candidates.map(c => ({ cat: c.cat, catRu: c.catRu, lv: c.lv, ru: '' }));
+  if (prepend) {
+    NEWS = [...freshNews, ...newsHistory];
+  } else {
+    NEWS = [...NEWS, ...freshNews];
+  }
+  newsLoaded = true;
+  if (prepend) { currentIndex = 0; }
+  render();
+  
+  // Translate sentence-by-sentence for 1:1 alignment
+  const allSentences = candidates.map(c => splitSentences(c.lv));
+  const allFlat = allSentences.flat();
+  const allTranslated = await Promise.all(
+    allFlat.map(s => translateText(s, 'lv', 'ru'))
+  );
+  let flatIdx = 0;
+  for (let i = 0; i < freshNews.length; i++) {
+    const sents = allSentences[i];
+    const ruParts = [];
+    for (let j = 0; j < sents.length; j++) {
+      let tr = allTranslated[flatIdx++] || '';
+      if (tr && !tr.endsWith('.') && !tr.endsWith('!') && !tr.endsWith('?')) tr += '.';
+      ruParts.push(tr);
+    }
+    freshNews[i].ru = ruParts.join(' ') || '(перевод недоступен)';
+  }
+  if (prepend) {
+    NEWS = [...freshNews, ...newsHistory];
+  } else {
+    // freshNews are already in NEWS at the end, just update in place
+    const startIdx = NEWS.length - freshNews.length;
+    for (let i = 0; i < freshNews.length; i++) {
+      NEWS[startIdx + i] = freshNews[i];
+    }
+  }
+  newsHistory = [...NEWS];
+  render();
+}
+
+// Decode HTML entities (&nbsp; &amp; &#123; etc.)
+function decodeHtml(html) {
+  const el = document.createElement('textarea');
+  el.innerHTML = html.replace(/<[^>]+>/g, '');
+  return el.value.replace(/\s+/g, ' ').trim();
+}
+
+function parseRssXml(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  return Array.from(doc.querySelectorAll('item')).map(it => {
+    const cats = Array.from(it.querySelectorAll('category')).map(c => c.textContent.trim());
+    return {
+      title: decodeHtml(it.querySelector('title')?.textContent || ''),
+      link: (it.querySelector('link')?.textContent || '').trim(),
+      desc: decodeHtml(it.querySelector('description')?.textContent || ''),
+      categories: cats
+    };
+  });
+}
+
+async function fetchRssItems() {
+  // Try direct fetch first (Delfi RSS has CORS headers)
+  try {
+    const r = await fetch(DELFI_RSS);
+    if (r.ok) {
+      const xml = await r.text();
+      const items = parseRssXml(xml);
+      if (items.length > 0) return items;
+    }
+  } catch(e) { console.warn('Direct Delfi RSS failed:', e); }
+  // Fallback: codetabs proxy
+  try {
+    const r = await fetch(PROXY + encodeURIComponent(DELFI_RSS));
+    const xml = await r.text();
+    const items = parseRssXml(xml);
+    if (items.length > 0) return items;
+  } catch(e) { console.warn('codetabs failed:', e); }
+  // Fallback: rss2json (10 items max)
+  try {
+    const r2 = await fetch(DELFI_RSS_FALLBACK);
+    const data = await r2.json();
+    if (data.status === 'ok' && data.items && data.items.length > 0) {
+      return data.items.map(it => ({
+        title: decodeHtml(it.title || ''), link: it.link || '',
+        desc: decodeHtml(it.description || ''),
+        categories: (it.categories || [])
+      }));
+    }
+  } catch(e2) { console.warn('rss2json failed:', e2); }
+  return [];
+}
+
+async function fetchNews() {
+  try {
+    rssItemsCache = await fetchRssItems();
+    rssOffset = 0;
+    const candidates = filterRssItems(rssItemsCache, NEWS_COUNT);
+    rssOffset = rssItemsCache.indexOf(
+      rssItemsCache.find(it => it.title === candidates[candidates.length - 1]?.lv?.split('.')[0])
+    ) + 1;
+    
+    if (candidates.length === 0) throw new Error('No matching news found');
+    await translateAndAddNews(candidates, true);
+  } catch(e) {
+    console.error('News fetch error:', e);
+    if (newsHistory.length > 0) {
+      NEWS = [...newsHistory];
+      newsLoaded = true;
+      return;
+    }
+    newsError = true;
+    NEWS = [{
+      cat: 'Kļūda', catRu: 'Ошибка',
+      lv: 'Neizdevās ielādēt ziņas. Pārlādējiet lapu.',
+      ru: 'Не удалось загрузить новости. Перезагрузите страницу.'
+    }];
+  }
+}
+
+let loadingMore = false;
+async function loadMore() {
+  if (loadingMore) return;
+  loadingMore = true;
+  $('btnMore').disabled = true;
+  $('btnMore').textContent = 'Загрузка...';
+  try {
+    // Try to get more from cache, or refetch
+    let remaining = rssItemsCache.filter(it => {
+      const title = (it.title || '').trim();
+      return !newsHistory.some(n => n.lv.startsWith(title));
+    });
+    if (remaining.length < MORE_COUNT) {
+      // Refetch RSS for fresh items
+      rssItemsCache = await fetchRssItems();
+      remaining = rssItemsCache.filter(it => {
+        const title = (it.title || '').trim();
+        return !newsHistory.some(n => n.lv.startsWith(title));
+      });
+    }
+    const candidates = filterRssItems(remaining, MORE_COUNT);
+    if (candidates.length > 0) {
+      await translateAndAddNews(candidates, false);
+      showToast('+' + candidates.length + ' новостей');
+    } else {
+      showToast('Нет новых новостей');
+    }
+  } catch(e) {
+    showToast('Ошибка загрузки');
+  }
+  loadingMore = false;
+  $('btnMore').disabled = false;
+  $('btnMore').textContent = 'Ещё новости';
+}
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+let currentIndex = 0;
+let translationVisible = false;
+let vocabulary = [];
+let vocabFilter = 'all';
+let vocabSearchQuery = '';
+let vocabSort = 'newest'; // 'newest' or 'alpha'
+
+const $ = id => document.getElementById(id);
+const mainArea = $('mainArea');
+const sentenceTable = $('sentenceTable');
+const selPopup = $('selPopup');
+const vocabOverlay = $('vocabOverlay');
+const vocabListWrap = $('vocabListWrap');
+const vocabBadge = $('vocabBadge');
+const vocabEmpty = $('vocabEmpty');
+const toast = $('toast');
+
+// ═══════════════════════════════════
+// RENDER
+// ═══════════════════════════════════
+function splitSentences(text) {
+  // Smart split: don't break on dots in numbers (16.), dates (8. aprīlī),
+  // times (13.30), abbreviations (Nr.), etc.
+  const results = [];
+  let buf = '';
+  for (let i = 0; i < text.length; i++) {
+    buf += text[i];
+    if (text[i] === '!' || text[i] === '?') {
+      results.push(buf.trim());
+      buf = '';
+      continue;
+    }
+    if (text[i] === '.') {
+      // Look back: if char before dot is a digit → don't split ("1991." "16." "13.30")
+      const prevChar = i > 0 ? text[i - 1] : '';
+      if (/\d/.test(prevChar)) continue;
+      // Look ahead: if next non-space char is lowercase → don't split (abbreviation)
+      const rest = text.substring(i + 1).trimStart();
+      if (rest && /^[a-zāčēģīķļņšūžа-яё]/.test(rest)) continue;
+      // Otherwise split
+      results.push(buf.trim());
+      buf = '';
+    }
+  }
+  if (buf.trim()) results.push(buf.trim());
+  return results.filter(Boolean);
+}
+
+function render() {
+  const n = NEWS[currentIndex];
+  $('lvCategory').textContent = n.cat;
+  $('ruCategory').textContent = n.catRu;
+  
+  const lvSents = splitSentences(n.lv);
+  const ruSents = splitSentences(n.ru);
+  const maxRows = Math.max(lvSents.length, ruSents.length);
+  
+  let html = '';
+  for (let i = 0; i < maxRows; i++) {
+    html += '<div class="sentence-row">';
+    html += '<div class="sent-lv">' + escHtml(lvSents[i] || '') + '</div>';
+    html += '<div class="sent-ru">' + escHtml(ruSents[i] || '') + '</div>';
+    html += '</div>';
+  }
+  sentenceTable.innerHTML = html;
+  
+  $('counter').textContent = `${currentIndex + 1} / ${NEWS.length}`;
+  $('btnPrev').disabled = currentIndex === 0;
+  $('btnNext').disabled = currentIndex === NEWS.length - 1;
+  translationVisible = false;
+  mainArea.classList.add('ru-hidden');
+}
+
+function showTranslation() {
+  translationVisible = true;
+  mainArea.classList.remove('ru-hidden');
+  recordTranslation();
+}
+
+function navigate(dir) {
+  const next = currentIndex + dir;
+  if (next < 0 || next >= NEWS.length) return;
+  sentenceTable.classList.add('fade-out');
+  setTimeout(() => {
+    currentIndex = next;
+    render();
+    sentenceTable.classList.remove('fade-out');
+  }, 200);
+}
+
+$('btnReveal').addEventListener('click', showTranslation);
+$('btnPrev').addEventListener('click', () => navigate(-1));
+$('btnNext').addEventListener('click', () => navigate(1));
+$('btnMore').addEventListener('click', loadMore);
+
+document.addEventListener('keydown', e => {
+  if (vocabOverlay.classList.contains('open')) { if (e.key === 'Escape') closeVocab(); return; }
+  if (e.key === 'ArrowLeft') navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'Enter' && !translationVisible) showTranslation();
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 60) { diff > 0 ? navigate(1) : navigate(-1); }
+}, { passive: true });
+
+// ═══════════════════════════════════
+// TEXT SELECTION
+// ═══════════════════════════════════
+let selectedText = '';
+let selectionSource = '';
+
+document.addEventListener('mouseup', () => {
+  setTimeout(() => {
+    const sel = window.getSelection();
+    selectedText = sel ? sel.toString().trim() : '';
+    if (selectedText.length > 1 && selectedText.length < 200) {
+      const anchorNode = sel.anchorNode;
+      const inLv = anchorNode && anchorNode.closest ? anchorNode.closest('.sent-lv') : (anchorNode.parentElement && anchorNode.parentElement.closest('.sent-lv'));
+      const inRu = anchorNode && anchorNode.closest ? anchorNode.closest('.sent-ru') : (anchorNode.parentElement && anchorNode.parentElement.closest('.sent-ru'));
+      if (inLv || inRu) {
+        selectionSource = inLv ? 'lv' : 'ru';
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        selPopup.style.top = (rect.top - 40) + 'px';
+        selPopup.style.left = (rect.left + rect.width / 2 - 60) + 'px';
+        selPopup.classList.add('show');
+      } else { selPopup.classList.remove('show'); }
+    } else { selPopup.classList.remove('show'); }
+  }, 10);
+});
+
+document.addEventListener('mousedown', e => {
+  if (!selPopup.contains(e.target)) selPopup.classList.remove('show');
+});
+
+// Clean selected text: strip numbers, punctuation debris, colons
+function cleanSelection(text) {
+  let t = text.trim();
+  // Remove leading/trailing punctuation, numbers, colons
+  t = t.replace(/^[\d:;,.!?\s%«»"]+/, '').replace(/[\d:;,.!?\s%«»"]+$/, '').trim();
+  return t;
+}
+
+selPopup.addEventListener('click', async () => {
+  if (!selectedText) return;
+  selPopup.classList.remove('show');
+  
+  // Clean the selection
+  let cleaned = cleanSelection(selectedText);
+  if (!cleaned || cleaned.length < 2) {
+    showToast('Выделите слово');
+    window.getSelection().removeAllRanges();
+    return;
+  }
+  
+  // Limit: max 3 words for vocab
+  const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+  if (words.length > 3) {
+    showToast('Выделите 1–3 слова');
+    window.getSelection().removeAllRanges();
+    return;
+  }
+  
+  const n = NEWS[currentIndex];
+  let lvWord, ruWord;
+  if (selectionSource === 'lv') {
+    lvWord = cleaned;
+    // Word-level translation only: try dict, then online for the WORD, not sentence
+    ruWord = translatePhrase(cleaned, 'lv', n.lv, n.ru);
+    if (!ruWord) {
+      showToast('Перевожу...');
+      ruWord = await translateWordOnline(cleaned, 'lv');
+    }
+  } else {
+    ruWord = cleaned;
+    lvWord = translatePhrase(cleaned, 'ru', n.lv, n.ru);
+    if (!lvWord) {
+      showToast('Перевожу...');
+      lvWord = await translateWordOnline(cleaned, 'ru');
+    }
+  }
+  
+  // Clean translation: word-level only, strip sentence-length results
+  function trimTranslation(t) {
+    if (!t) return t;
+    // Take first meaning only
+    t = t.split(/[,.;]/)[0].trim();
+    // If still too long (>40 chars or >4 words), likely a sentence — reject
+    if (t.length > 40 || t.split(/\s+/).length > 4) return '';
+    return t;
+  }
+  ruWord = trimTranslation(ruWord);
+  lvWord = trimTranslation(lvWord);
+  
+  const exists = vocabulary.some(v => v.lv.toLowerCase() === lvWord.toLowerCase());
+  if (!exists) {
+    vocabulary.push({ lv: lvWord, ru: ruWord || '?', fav: false, learned: false });
+    updateBadge();
+    renderVocab();
+    showToast('Сохранено: «' + (selectionSource === 'lv' ? lvWord : ruWord || '?') + '»');
+  } else {
+    showToast('Уже в словарике');
+  }
+  window.getSelection().removeAllRanges();
+});
+
+// For live news: if built-in dict misses, try MyMemory for single-word translation
+async function translateWordOnline(word, sourceLang) {
+  const from = sourceLang === 'lv' ? 'lv' : 'ru';
+  const to = sourceLang === 'lv' ? 'ru' : 'lv';
+  const result = await translateText(word, from, to);
+  return result || '';
+}
+
+// ═══════════════════════════════════
+// VOCABULARY
+// ═══════════════════════════════════
+function updateBadge() {
+  const c = vocabulary.filter(v => !v.learned).length;
+  vocabBadge.textContent = c;
+  vocabBadge.classList.toggle('show', c > 0);
+}
+
+function getFilteredVocab() {
+  let list;
+  if (vocabFilter === 'fav') {
+    list = vocabulary.filter(v => v.fav);
+  } else if (vocabFilter === 'learned') {
+    list = vocabulary.filter(v => v.learned);
+  } else {
+    // "Новое" — hides learned words
+    list = vocabulary.filter(v => !v.learned);
+  }
+  if (vocabSearchQuery) {
+    const q = vocabSearchQuery.toLowerCase();
+    list = list.filter(v => v.lv.toLowerCase().includes(q) || v.ru.toLowerCase().includes(q));
+  }
+  // Sort: newest first (reverse addition order) or alphabetical
+  if (vocabSort === 'alpha') {
+    list.sort((a, b) => a.lv.toLowerCase().localeCompare(b.lv.toLowerCase()));
+  } else {
+    list.reverse(); // newest first (last added → top)
+  }
+  return list;
+}
+
+function renderVocab() {
+  const filtered = getFilteredVocab();
+  const totalActive = vocabulary.filter(v => !v.learned).length;
+  const totalFav = vocabulary.filter(v => v.fav).length;
+  const totalLearned = vocabulary.filter(v => v.learned).length;
+  
+  // Update filter tab counts
+  $('countAll').textContent = totalActive || '';
+  $('countFav').textContent = totalFav || '';
+  $('countLearned').textContent = totalLearned || '';
+  
+  $('vocabCountLabel').textContent = vocabulary.length + ' ' + pluralize(vocabulary.length);
+  $('vocabFooterStats').textContent = `Изучаю: ${totalActive} · Выучено: ${totalLearned}`;
+  $('vocabFooterShowing').textContent = filtered.length !== totalActive && vocabFilter !== 'learned' ? `Показано: ${filtered.length}` : '';
+  
+  if (vocabulary.length === 0) {
+    vocabEmpty.style.display = 'block';
+    vocabEmpty.innerHTML = 'Выделите слово или фразу в тексте, чтобы сохранить в словарик.';
+    const items = vocabListWrap.querySelectorAll('.vocab-item');
+    items.forEach(el => el.remove());
+    return;
+  }
+  
+  if (filtered.length === 0) {
+    vocabEmpty.style.display = 'block';
+    const emptyTexts = { all: 'Нет новых слов', fav: 'Нет избранных слов', learned: 'Нет выученных слов' };
+    vocabEmpty.textContent = vocabSearchQuery ? 'Ничего не найдено' : (emptyTexts[vocabFilter] || 'Нет слов');
+    const items = vocabListWrap.querySelectorAll('.vocab-item');
+    items.forEach(el => el.remove());
+    return;
+  }
+  
+  vocabEmpty.style.display = 'none';
+  
+  // Remove old items
+  const oldItems = vocabListWrap.querySelectorAll('.vocab-item');
+  oldItems.forEach(el => el.remove());
+  
+  filtered.forEach(item => {
+    const realIndex = vocabulary.indexOf(item);
+    const div = document.createElement('div');
+    div.className = 'vocab-item';
+    div.innerHTML = `
+      <button class="vocab-fav-btn ${item.fav ? 'active' : ''}" data-action="fav" data-idx="${realIndex}" title="Избранное">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="${item.fav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <div class="vocab-words">
+        <span class="vocab-lv">${escHtml(item.lv)}</span>
+        <span class="vocab-sep">—</span>
+        <span class="vocab-ru">${escHtml(item.ru || '?')}</span>
+      </div>
+      <button class="vocab-action-btn learned ${item.learned ? 'active' : ''}" data-action="learned" data-idx="${realIndex}" title="Выучено">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button class="vocab-action-btn del" data-action="del" data-idx="${realIndex}" title="Удалить">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    vocabListWrap.appendChild(div);
+  });
+}
+
+// Delegate clicks
+$('vocabListWrap').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const idx = parseInt(btn.dataset.idx);
+  if (btn.dataset.action === 'fav') {
+    vocabulary[idx].fav = !vocabulary[idx].fav;
+    renderVocab();
+  } else if (btn.dataset.action === 'learned') {
+    vocabulary[idx].learned = !vocabulary[idx].learned;
+    if (vocabulary[idx].learned) {
+      showToast('Выучено: «' + vocabulary[idx].lv + '»');
+    }
+    updateBadge();
+    renderVocab();
+  } else if (btn.dataset.action === 'del') {
+    vocabulary.splice(idx, 1);
+    updateBadge();
+    renderVocab();
+  }
+});
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function pluralize(n) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'слово';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return 'слова';
+  return 'слов';
+}
+
+$('vocabToggle').addEventListener('click', () => { vocabOverlay.classList.add('open'); renderVocab(); $('vocabSearch').focus(); });
+$('vocabClose').addEventListener('click', closeVocab);
+function closeVocab() { vocabOverlay.classList.remove('open'); }
+
+$('vocabSearch').addEventListener('input', e => { vocabSearchQuery = e.target.value; renderVocab(); });
+
+$('vocabSortToggle').addEventListener('click', () => {
+  vocabSort = vocabSort === 'newest' ? 'alpha' : 'newest';
+  $('sortLabel').textContent = vocabSort === 'alpha' ? 'А–Я' : 'Новые';
+  $('vocabSortToggle').classList.toggle('active', vocabSort === 'alpha');
+  renderVocab();
+});
+
+$('vocabExport').addEventListener('click', () => {
+  if (vocabulary.length === 0) { showToast('Словарь пуст'); return; }
+  const BOM = '\uFEFF';
+  const header = 'Latviešu;Krievu;Избранное;Выучено';
+  const rows = vocabulary.map(v => {
+    const lv = v.lv.replace(/"/g, '""');
+    const ru = v.ru.replace(/"/g, '""');
+    return `"${lv}";"${ru}";${v.fav ? 'да' : ''};${v.learned ? 'да' : ''}`;
+  });
+  const csv = BOM + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'my-vocabulary.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Словарь скачан');
+});
+
+document.querySelectorAll('.vocab-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.vocab-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    vocabFilter = btn.dataset.filter;
+    renderVocab();
+  });
+});
+
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// Show loading state, then fetch live news
+function showLoading() {
+  $('lvCategory').textContent = '';
+  $('ruCategory').textContent = '';
+  sentenceTable.innerHTML = '<div class="sentence-row"><div class="sent-lv" style="color:var(--text-faint)">Загрузка новостей...</div><div class="sent-ru"></div></div>';
+  $('counter').textContent = '...';
+  $('btnPrev').disabled = true;
+  $('btnNext').disabled = true;
+}
+
+// ═══════════════════════════════════
+// STREAK TRACKER
+// ═══════════════════════════════════
+const DAILY_GOAL = 5;
+const STREAK_KEY = 'lll_streak_days';
+
+function dateStr(date) {
+  return date.toISOString().slice(0, 10);
+}
+function todayStr() {
+  return dateStr(new Date());
+}
+
+function loadStreakDays() {
+  try { return JSON.parse(localStorage.getItem(STREAK_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function saveStreakDays(days) {
+  localStorage.setItem(STREAK_KEY, JSON.stringify(days));
+}
+
+function calcStreak(days) {
+  let streak = 0;
+  let d = new Date();
+  // If today is not done yet, start from yesterday
+  const todayKey = todayStr();
+  if (!days[todayKey] || days[todayKey] < DAILY_GOAL) {
+    d.setDate(d.getDate() - 1);
+  }
+  while (true) {
+    const key = dateStr(d);
+    if (days[key] && days[key] >= DAILY_GOAL) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+const translatedSession = new Set();
+let recoverDate = null; // если не null — режим восстановления
+
+function recordTranslation() {
+  const newsKey = currentIndex + '_' + (NEWS[currentIndex]?.lv || '').substring(0, 30);
+  if (translatedSession.has(newsKey)) return;
+  translatedSession.add(newsKey);
+  const days = loadStreakDays();
+  const key = recoverDate || todayStr();
+  days[key] = (days[key] || 0) + 1;
+  saveStreakDays(days);
+  if (recoverDate) updateRecoverBanner();
+  // Если восстановление завершено
+  if (recoverDate && days[key] >= DAILY_GOAL) {
+    showToast(`${recoverDate} восстановлен ✓`);
+    recoverDate = null;
+    document.body.classList.remove('recover-active');
+    updateRecoverBanner();
+  }
+  updateStreakUI();
+}
+
+function startRecovery(dateKey) {
+  recoverDate = dateKey;
+  translatedSession.clear();
+  document.body.classList.add('recover-active');
+  updateRecoverBanner();
+  $('streakOverlay').style.display = 'none';
+  showToast(`Восстановление ${dateKey}: прочитайте 5 новостей`);
+}
+
+function cancelRecovery() {
+  recoverDate = null;
+  document.body.classList.remove('recover-active');
+  updateRecoverBanner();
+}
+
+function updateRecoverBanner() {
+  let banner = $('recoverBanner');
+  if (recoverDate) {
+    const days = loadStreakDays();
+    const count = days[recoverDate] || 0;
+    const left = DAILY_GOAL - count;
+    banner.innerHTML = `Восстановление ${recoverDate}: ${count}/${DAILY_GOAL} <button onclick="cancelRecovery()" style="margin-left:8px;cursor:pointer;background:none;border:1px solid var(--text-faint);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--text-muted);font-family:var(--font)">Отмена</button>`;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function updateStreakUI() {
+  const days = loadStreakDays();
+  const streak = calcStreak(days);
+  const todayCount = days[todayStr()] || 0;
+  $('streakNum').textContent = streak;
+  $('streakBtn').classList.toggle('active', streak > 0);
+  // Update overlay if open
+  if ($('streakOverlay').style.display !== 'none') renderStreakOverlay();
+}
+
+function renderStreakOverlay() {
+  const days = loadStreakDays();
+  const streak = calcStreak(days);
+  const todayCount = days[todayStr()] || 0;
+  const remaining = Math.max(0, DAILY_GOAL - todayCount);
+  
+  $('streakBig').innerHTML = `${streak} <small>дней подряд</small>`;
+  $('streakToday').textContent = remaining > 0
+    ? `Сегодня: ${todayCount}/${DAILY_GOAL} — ещё ${remaining}`
+    : `Сегодня: выполнено ✓`;
+  
+  // Build heatmap: 53 weeks (371 days), ending today
+  const today = new Date();
+  const heatmap = $('heatmap');
+  heatmap.innerHTML = '';
+  
+  // Start from 52 weeks ago, aligned to Sunday
+  const start = new Date(today);
+  start.setDate(start.getDate() - 52 * 7 - start.getDay());
+  
+  const cells = [];
+  const d = new Date(start);
+  while (d <= today) {
+    const key = dateStr(d);
+    const count = days[key] || 0;
+    const isFuture = d > today;
+    const isDone = count >= DAILY_GOAL;
+    const isPast = d < today && !isFuture;
+    
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    if (isFuture) {
+      cell.classList.add('hm-future');
+    } else if (isDone) {
+      cell.classList.add('hm-done');
+      cell.title = `${key}: ${count} переводов`;
+    } else {
+      cell.classList.add('hm-empty');
+      if (isPast) {
+        cell.classList.add('hm-recover');
+        cell.title = `${key}: клик для восстановления`;
+        cell.dataset.date = key;
+        cell.addEventListener('click', () => startRecovery(key));
+      } else {
+        cell.title = `Сегодня: ${count}/${DAILY_GOAL}`;
+      }
+    }
+    heatmap.appendChild(cell);
+    d.setDate(d.getDate() + 1);
+  }
+  
+  // Month labels
+  const months = $('heatmapMonths');
+  const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const startMonth = start.getMonth();
+  let labels = '';
+  for (let i = 0; i < 12; i++) {
+    const mi = (startMonth + i + 1) % 12;
+    labels += `<span>${monthNames[mi]}</span>`;
+  }
+  months.innerHTML = labels;
+}
+
+$('streakBtn').addEventListener('click', () => {
+  const overlay = $('streakOverlay');
+  const isOpen = overlay.style.display !== 'none';
+  overlay.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) renderStreakOverlay();
+});
+$('streakClose').addEventListener('click', () => {
+  $('streakOverlay').style.display = 'none';
+});
+
+async function init() {
+  showLoading();
+  updateBadge();
+  updateStreakUI();
+  await fetchNews();
+  currentIndex = 0;
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
