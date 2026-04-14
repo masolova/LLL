@@ -80,27 +80,40 @@ body {
 .streak-btn.active { color: var(--accent); }
 
 /* ── STREAK OVERLAY ── */
-.streak-body { padding: 24px; overflow-y: auto; flex: 1; }
-.streak-big {
-  font-size: 48px; font-weight: 700; color: var(--text); text-align: center;
-  margin-bottom: 4px; line-height: 1.2;
+.streak-body { padding: 0; overflow-y: auto; flex: 1; display: flex; flex-direction: column; }
+.streak-layout {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  min-height: 33vh;
 }
-.streak-big small { font-size: 16px; font-weight: 400; color: var(--text-muted); }
+.streak-left {
+  flex: 0 0 auto; margin-left: 12.5%; padding: 32px; display: flex; flex-direction: column; justify-content: center;
+}
+.streak-right {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px;
+}
+.streak-big {
+  font-size: 144px; font-weight: 700; color: var(--text); line-height: 1; text-align: center;
+}
+.streak-big small { display: block; font-size: 36px; font-weight: 400; color: var(--text-muted); margin-top: 12px; }
 .streak-today {
-  text-align: center; font-size: 13px; color: var(--text-faint); margin-bottom: 24px;
+  font-size: 24px; color: var(--text-faint); margin-top: 16px; text-align: center;
 }
 .heatmap-months {
-  display: flex; justify-content: space-between; font-size: 10px;
-  color: var(--text-faint); margin-bottom: 4px; padding: 0 2px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 38px;
+  gap: 4px; font-size: 22px;
+  color: var(--text-faint); margin-bottom: 8px;
 }
 .heatmap {
   display: grid;
-  grid-template-columns: repeat(53, 1fr);
-  grid-template-rows: repeat(7, 1fr);
-  gap: 2px; margin-bottom: 12px;
+  grid-template-rows: repeat(7, 38px);
+  grid-auto-flow: column;
+  grid-auto-columns: 38px;
+  gap: 4px; margin-bottom: 10px;
 }
 .hm-cell {
-  width: 12px; height: 12px; border-radius: 2px; cursor: default;
+  width: 38px; height: 38px; border-radius: 5px; cursor: default;
 }
 .hm-empty { background: #eee; }
 .hm-done { background: var(--accent); }
@@ -108,11 +121,11 @@ body {
 .hm-recover { cursor: pointer; }
 .hm-recover:hover { background: #ddd; outline: 2px solid var(--accent); }
 .heatmap-legend {
-  display: flex; align-items: center; gap: 6px; justify-content: flex-end;
-  font-size: 11px; color: var(--text-faint); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 22px; color: var(--text-faint); margin-top: 8px;
 }
-.heatmap-legend .hm-cell { width: 10px; height: 10px; }
-.streak-hint { text-align: center; font-size: 12px; color: var(--text-faint); }
+.heatmap-legend .hm-cell { width: 18px; height: 18px; }
+.streak-hint { font-size: 22px; color: var(--text-faint); margin-top: 4px; }
 
 /* ── RECOVER BANNER ── */
 .recover-banner {
@@ -176,9 +189,10 @@ body {
   display: flex; gap: 8px; align-items: center; z-index: 5;
 }
 .btn-more {
-  padding: 6px 16px; border: 1px solid var(--border); background: var(--surface);
+  position: absolute; bottom: 16px; right: 32px;
+  padding: 6px 16px; border: 1px solid var(--border); background: #fff;
   border-radius: var(--radius); font-family: var(--font); font-size: 12px; font-weight: 600;
-  color: var(--text-muted); cursor: pointer; transition: all .15s; margin-left: 12px;
+  color: var(--text-muted); cursor: pointer; transition: all .15s; z-index: 5;
 }
 .btn-more:hover { border-color: var(--accent); color: var(--accent); }
 .btn-more:disabled { opacity: .4; cursor: default; }
@@ -295,8 +309,13 @@ body {
   padding: 10px 24px; border-top: 1px solid var(--border);
   background: var(--surface); font-size: 12px; color: var(--text-faint); flex-shrink: 0;
 }
-.btn-export { width: 32px; height: 32px; color: var(--text-faint); }
-.btn-export:hover { color: var(--accent); background: var(--accent-soft); }
+.btn-export {
+  display: flex; align-items: center; gap: 4px; padding: 4px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); font-family: var(--font); font-size: 11px;
+  color: var(--text-faint); cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.btn-export:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 
 /* ── TOAST ── */
 .toast {
@@ -308,6 +327,44 @@ body {
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  /* Main layout: vertical stacking */
+  .main { padding: 16px 12px 72px; justify-content: flex-start; overflow-y: auto; }
+  .sentence-table { max-width: 100%; }
+  .cat-row { flex-direction: column; gap: 0; margin-bottom: 8px; }
+  .cat-ru { margin-top: 2px; }
+  .sentence-row { flex-direction: column; }
+  .sent-lv, .sent-ru { padding: 6px 12px; font-size: 18px; }
+  .sent-ru { border-left: none; border-top: 1px solid var(--border); }
+  .reveal-prompt { width: 100%; position: relative; padding: 24px 16px; top: auto; right: auto; bottom: auto; left: auto; }
+  .ru-hidden .reveal-prompt { position: relative; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+  .nav-arrows { left: 50%; bottom: 12px; }
+  .btn-more { right: 12px; bottom: 12px; }
+
+  /* Streak overlay: vertical stack */
+  .streak-layout { flex-direction: column; min-height: auto; }
+  .streak-left { margin-left: 0; padding: 16px; flex: 0 0 auto; }
+  .streak-right { padding: 16px; }
+  .streak-big { font-size: 72px; }
+  .streak-big small { font-size: 22px; }
+  .streak-today { font-size: 16px; }
+  .heatmap {
+    grid-template-rows: repeat(7, 20px);
+    grid-auto-columns: 20px;
+    gap: 3px;
+  }
+  .hm-cell { width: 20px; height: 20px; border-radius: 3px; }
+  .heatmap-months { grid-auto-columns: 20px; gap: 3px; font-size: 12px; }
+  .heatmap-legend { font-size: 12px; }
+  .heatmap-legend .hm-cell { width: 12px; height: 12px; }
+  .streak-hint { font-size: 12px; }
+
+  /* Header compact */
+  .header { padding: 8px 12px; height: 44px; }
+  .logo-mark { width: 24px; height: 24px; }
+  .logo-text { font-size: 14px; }
+}
 </style>
 </head>
 <body>
@@ -354,8 +411,8 @@ body {
     <button class="btn-nav" id="btnNext" aria-label="Следующая">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <button class="btn-more" id="btnMore">Ещё новости</button>
   </div>
+  <button class="btn-more" id="btnMore">Ещё новости</button>
 </div>
 
 <div class="selection-popup" id="selPopup">
@@ -397,8 +454,9 @@ body {
   <div class="vocab-footer">
     <span id="vocabFooterStats">Всего: 0</span>
     <span id="vocabFooterShowing"></span>
-    <button class="btn-icon btn-export" id="vocabExport" title="Скачать словарь">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <button class="btn-export" id="vocabExport" title="Скачать словарь">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Скачать
     </button>
   </div>
 </div>
@@ -412,17 +470,23 @@ body {
     </button>
   </div>
   <div class="streak-body" id="streakBody">
-    <div class="streak-big" id="streakBig">0 <small>дней подряд</small></div>
-    <div class="streak-today" id="streakToday"></div>
-    <div class="heatmap-months" id="heatmapMonths"></div>
-    <div class="heatmap" id="heatmap"></div>
-    <div class="heatmap-legend">
-      <span>Пусто</span>
-      <span class="hm-cell hm-empty" style="display:inline-block"></span>
-      <span class="hm-cell hm-done" style="display:inline-block"></span>
-      <span>Выполнено</span>
+    <div class="streak-layout">
+      <div class="streak-left">
+        <div class="heatmap-months" id="heatmapMonths"></div>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="heatmap-legend">
+          <span>Пусто</span>
+          <span class="hm-cell hm-empty" style="display:inline-block"></span>
+          <span class="hm-cell hm-done" style="display:inline-block"></span>
+          <span>Выполнено</span>
+        </div>
+        <div class="streak-hint">Клик на пустой день = восстановить</div>
+      </div>
+      <div class="streak-right">
+        <div class="streak-big" id="streakBig">0 <small>дней подряд</small></div>
+        <div class="streak-today" id="streakToday"></div>
+      </div>
     </div>
-    <div class="streak-hint">Клик на пустой день = восстановить</div>
   </div>
 </div>
 
@@ -895,6 +959,19 @@ function splitSentences(text) {
   return results.filter(Boolean);
 }
 
+function autoScaleMobileText() {
+  if (window.innerWidth > 600) return;
+  const cells = sentenceTable.querySelectorAll('.sent-lv');
+  if (!cells.length) return;
+  // Total text length across all LV cells
+  let totalLen = 0;
+  cells.forEach(c => totalLen += c.textContent.length);
+  // Scale: short text (< 80 chars) → 28px, long (> 300) → 16px
+  const size = Math.round(Math.max(16, Math.min(28, 28 - (totalLen - 80) * 0.055)));
+  cells.forEach(c => c.style.fontSize = size + 'px');
+  sentenceTable.querySelectorAll('.sent-ru').forEach(c => c.style.fontSize = size + 'px');
+}
+
 function render() {
   const n = NEWS[currentIndex];
   $('lvCategory').textContent = n.cat;
@@ -912,6 +989,7 @@ function render() {
     html += '</div>';
   }
   sentenceTable.innerHTML = html;
+  autoScaleMobileText();
   
   $('counter').textContent = `${currentIndex + 1} / ${NEWS.length}`;
   $('btnPrev').disabled = currentIndex === 0;
@@ -1353,21 +1431,24 @@ function renderStreakOverlay() {
   const todayCount = days[todayStr()] || 0;
   const remaining = Math.max(0, DAILY_GOAL - todayCount);
   
-  $('streakBig').innerHTML = `${streak} <small>дней подряд</small>`;
+  const dd = streak % 100;
+  const streakWord = (dd >= 11 && dd <= 19) ? 'дней' : (dd % 10 === 1) ? 'день' : (dd % 10 >= 2 && dd % 10 <= 4) ? 'дня' : 'дней';
+  $('streakBig').innerHTML = `${streak} <small>${streakWord} подряд</small>`;
   $('streakToday').textContent = remaining > 0
     ? `Сегодня: ${todayCount}/${DAILY_GOAL} — ещё ${remaining}`
     : `Сегодня: выполнено ✓`;
   
-  // Build heatmap: 53 weeks (371 days), ending today
+  // Build heatmap: ~100 days (~15 weeks), ending today
   const today = new Date();
   const heatmap = $('heatmap');
   heatmap.innerHTML = '';
   
-  // Start from 52 weeks ago, aligned to Sunday
+  // Start from 14 weeks ago, aligned to Monday
   const start = new Date(today);
-  start.setDate(start.getDate() - 52 * 7 - start.getDay());
+  const dayOfWeek = (start.getDay() + 6) % 7; // Mon=0
+  start.setDate(start.getDate() - 14 * 7 - dayOfWeek);
   
-  const cells = [];
+  // Grid flows column-by-column (each column = 1 week, Mon at top)
   const d = new Date(start);
   while (d <= today) {
     const key = dateStr(d);
@@ -1398,16 +1479,20 @@ function renderStreakOverlay() {
     d.setDate(d.getDate() + 1);
   }
   
-  // Month labels
+  // Month labels — position above each week where month changes
   const months = $('heatmapMonths');
   const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  const startMonth = start.getMonth();
-  let labels = '';
-  for (let i = 0; i < 12; i++) {
-    const mi = (startMonth + i + 1) % 12;
-    labels += `<span>${monthNames[mi]}</span>`;
+  const totalWeeks = Math.ceil(((today - start) / 86400000 + 1) / 7);
+  const labelArr = new Array(totalWeeks).fill('');
+  const md = new Date(start);
+  let prevMonth = -1;
+  for (let w = 0; w < totalWeeks; w++) {
+    const m = md.getMonth();
+    if (m !== prevMonth) { labelArr[w] = monthNames[m]; prevMonth = m; }
+    md.setDate(md.getDate() + 7);
   }
-  months.innerHTML = labels;
+  months.innerHTML = labelArr.map(l => `<span>${l}</span>`).join('');
+  months.style.width = heatmap.scrollWidth + 'px';
 }
 
 $('streakBtn').addEventListener('click', () => {
