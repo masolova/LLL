@@ -196,6 +196,21 @@ body {
 }
 .btn-more:hover { border-color: var(--accent); color: var(--accent); }
 .btn-more:disabled { opacity: .4; cursor: default; }
+/* Play button — pill */
+.play-row {
+  display: flex; justify-content: center; padding: 14px 0;
+  width: 50%;
+}
+.btn-play {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 8px 16px 8px 12px; border-radius: 20px;
+  transition: all .15s;
+}
+.btn-play svg { color: var(--accent); }
+.btn-play:hover { border-color: var(--accent); color: var(--accent); }
+.btn-play.playing { border-color: var(--accent); color: var(--accent); }
 .nav-arrows .counter { font-size: 12px; color: var(--text-faint); min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
 .btn-nav {
   width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
@@ -341,6 +356,7 @@ body {
   .ru-hidden .reveal-prompt { position: relative; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
   .nav-arrows { left: 50%; bottom: 12px; }
   .btn-more { right: 12px; bottom: 12px; }
+  .play-row { width: 100%; }
 
   /* Streak overlay: vertical stack */
   .streak-layout { flex-direction: column; min-height: auto; }
@@ -399,6 +415,12 @@ body {
     <div class="cat-ru" id="ruCategory"></div>
   </div>
   <div class="sentence-table" id="sentenceTable"></div>
+  <div class="play-row" id="playRow">
+    <button class="btn-play" id="btnPlay" aria-label="Прослушать" title="Прослушать">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      Прослушать
+    </button>
+  </div>
   <div class="reveal-prompt">
     <div class="reveal-hint">Прочитали текст на латышском?</div>
     <button class="btn-reveal" id="btnReveal">Показать перевод</button>
@@ -965,15 +987,18 @@ function splitSentences(text) {
 
 function autoScaleMobileText() {
   if (window.innerWidth > 600) return;
-  const cells = sentenceTable.querySelectorAll('.sent-lv');
-  if (!cells.length) return;
-  // Total text length across all LV cells
-  let totalLen = 0;
-  cells.forEach(c => totalLen += c.textContent.length);
-  // Scale: short text (< 80 chars) → 28px, long (> 300) → 16px
-  const size = Math.round(Math.max(16, Math.min(28, 28 - (totalLen - 80) * 0.055)));
-  cells.forEach(c => c.style.fontSize = size + 'px');
-  sentenceTable.querySelectorAll('.sent-ru').forEach(c => c.style.fontSize = size + 'px');
+  const lvCells = sentenceTable.querySelectorAll('.sent-lv');
+  const ruCells = sentenceTable.querySelectorAll('.sent-ru');
+  if (!lvCells.length) return;
+  // Use the longer of LV or RU total text
+  let lvLen = 0, ruLen = 0;
+  lvCells.forEach(c => lvLen += c.textContent.length);
+  ruCells.forEach(c => ruLen += c.textContent.length);
+  const totalLen = Math.max(lvLen, ruLen);
+  // Scale: short text (< 80 chars) → 26px, long (> 300) → 15px
+  const size = Math.round(Math.max(15, Math.min(26, 26 - (totalLen - 80) * 0.05)));
+  lvCells.forEach(c => c.style.fontSize = size + 'px');
+  ruCells.forEach(c => c.style.fontSize = size + 'px');
 }
 
 function render() {
@@ -1005,6 +1030,7 @@ function render() {
 function showTranslation() {
   translationVisible = true;
   mainArea.classList.remove('ru-hidden');
+  autoScaleMobileText();
   recordTranslation();
 }
 
@@ -1023,6 +1049,45 @@ $('btnReveal').addEventListener('click', showTranslation);
 $('btnPrev').addEventListener('click', () => navigate(-1));
 $('btnNext').addEventListener('click', () => navigate(1));
 $('btnMore').addEventListener('click', loadMore);
+
+// ── TTS ──
+let ttsAudio = null;
+$('btnPlay').addEventListener('click', async () => {
+  const btn = $('btnPlay');
+  // If already playing, stop
+  if (ttsAudio && !ttsAudio.paused) {
+    ttsAudio.pause();
+    ttsAudio.currentTime = 0;
+    btn.classList.remove('playing');
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg> Прослушать';
+    return;
+  }
+  // Collect LV text
+  const lvCells = sentenceTable.querySelectorAll('.sent-lv');
+  const text = [...lvCells].map(c => c.textContent.trim()).filter(Boolean).join(' ');
+  if (!text) return;
+  btn.classList.add('playing');
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Пауза';
+  try {
+    const r = await fetch(TRANSLATE_WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'tts', text, lang: 'lv-LV' })
+    });
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    ttsAudio = new Audio(url);
+    ttsAudio.addEventListener('ended', () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg> Прослушать';
+    });
+    ttsAudio.play();
+  } catch(e) {
+    console.warn('TTS error:', e);
+    btn.classList.remove('playing');
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg> Прослушать';
+  }
+});
 
 document.addEventListener('keydown', e => {
   if (vocabOverlay.classList.contains('open')) { if (e.key === 'Escape') closeVocab(); return; }
