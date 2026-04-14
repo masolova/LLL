@@ -779,14 +779,7 @@ function filterRssItems(items, count) {
 
 async function translateAndAddNews(candidates, prepend) {
   const freshNews = candidates.map(c => ({ cat: c.cat, catRu: c.catRu, lv: c.lv, ru: '' }));
-  if (prepend) {
-    NEWS = [...freshNews, ...newsHistory];
-  } else {
-    NEWS = [...NEWS, ...freshNews];
-  }
   newsLoaded = true;
-  if (prepend) { currentIndex = 0; }
-  render();
   
   // Translate sentence-by-sentence for 1:1 alignment
   const allSentences = candidates.map(c => splitSentences(c.lv));
@@ -808,11 +801,7 @@ async function translateAndAddNews(candidates, prepend) {
   if (prepend) {
     NEWS = [...freshNews, ...newsHistory];
   } else {
-    // freshNews are already in NEWS at the end, just update in place
-    const startIdx = NEWS.length - freshNews.length;
-    for (let i = 0; i < freshNews.length; i++) {
-      NEWS[startIdx + i] = freshNews[i];
-    }
+    NEWS = [...NEWS, ...freshNews];
   }
   newsHistory = [...NEWS];
   render();
