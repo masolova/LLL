@@ -162,7 +162,7 @@ body {
   flex: 1; padding: 2px 16px; line-height: 1.4;
 }
 .sent-lv { font-size: 22px; font-weight: 400; color: var(--text); }
-.sent-ru { font-size: 22px; color: var(--text-muted); border-left: 1px solid var(--border); }
+.sent-ru { font-size: 22px; color: var(--text); border-left: 1px solid var(--border); }
 
 /* Hidden translation */
 .ru-hidden .sent-ru { visibility: hidden; }
@@ -419,7 +419,7 @@ body {
     <div class="cat-ru" id="ruCategory"></div>
   </div>
   <div class="sentence-table" id="sentenceTable"></div>
-  <div class="play-row" id="playRow">
+  <div class="play-row" id="playRow" style="display:none">
     <button class="btn-play" id="btnPlay" aria-label="Прослушать" title="Прослушать">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
       Прослушать
@@ -1015,6 +1015,7 @@ function render() {
   sentenceTable.innerHTML = html;
   autoScaleMobileText();
   
+  $('playRow').style.display = 'flex';
   $('counter').textContent = `${currentIndex + 1} / ${NEWS.length}`;
   $('btnPrev').disabled = currentIndex === 0;
   $('btnNext').disabled = currentIndex === NEWS.length - 1;
@@ -1385,6 +1386,7 @@ function showToast(msg) {
 
 // Show loading state, then fetch live news
 function showLoading() {
+  $('playRow').style.display = 'none';
   $('lvCategory').textContent = '';
   $('ruCategory').textContent = '';
   sentenceTable.innerHTML = '<div class="sentence-row"><div class="sent-lv" style="color:var(--text-faint)">Загрузка новостей...</div><div class="sent-ru"></div></div>';
