@@ -198,8 +198,11 @@ body {
 .btn-more:disabled { opacity: .4; cursor: default; }
 /* Play button — pill */
 .play-row {
-  display: flex; justify-content: center; padding: 14px 0;
-  width: 50%;
+  display: flex; justify-content: flex-start; padding: 14px 0;
+  width: 100%; max-width: 900px;
+}
+.play-row .btn-play {
+  margin-left: calc(25% - 50px); /* center under LV column */
 }
 .btn-play {
   border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
@@ -356,7 +359,8 @@ body {
   .ru-hidden .reveal-prompt { position: relative; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
   .nav-arrows { left: 50%; bottom: 12px; }
   .btn-more { right: 12px; bottom: 12px; }
-  .play-row { width: 100%; }
+  .play-row { width: 100%; justify-content: center; }
+  .play-row .btn-play { margin-left: 0; }
 
   /* Streak overlay: vertical stack */
   .streak-layout { flex-direction: column; min-height: auto; }
