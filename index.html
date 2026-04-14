@@ -646,8 +646,7 @@ const MORE_COUNT = 5;
 const DELFI_RSS = 'https://www.delfi.lv/rss/index.xml';
 const DELFI_RSS_FALLBACK = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.delfi.lv%2Frss%2Findex.xml';
 const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
-const GOOGLE_TRANSLATE_KEY = 'AIzaSyBgwM0gqpszGcvT3CgVK9VFp1ojAMO6pzg';
-const GOOGLE_TRANSLATE = 'https://translation.googleapis.com/language/translate/v2';
+const TRANSLATE_WORKER = 'https://lll-translate.elena-masolova.workers.dev';
 
 // Category mapping from Delfi RSS <category> tags
 const CAT_MAP = {
@@ -696,17 +695,16 @@ function validTranslationLang(text, targetLang) {
 
 async function translateText(text, from, to) {
   try {
-    const url = `${GOOGLE_TRANSLATE}?key=${GOOGLE_TRANSLATE_KEY}`;
-    const r = await fetch(url, {
+    const r = await fetch(TRANSLATE_WORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: text, source: from, target: to, format: 'text' })
+      body: JSON.stringify({ q: text, source: from, target: to })
     });
     const j = await r.json();
     if (j.data && j.data.translations && j.data.translations[0]) {
       const t = j.data.translations[0].translatedText;
       if (!validTranslationLang(t, to)) return '';
-      return decodeHtml(t); // Google may return HTML entities
+      return decodeHtml(t);
     }
   } catch(e) { console.warn('Translation error:', e); }
   return '';
